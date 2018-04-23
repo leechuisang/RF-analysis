@@ -1,0 +1,51 @@
+# Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file from GC machine
+# Must place script in same directory as .txt files (warning - reads ALL .txt files)
+# Still room to automate
+
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my @files = glob("*.txt");
+my %unique = ();
+my @samples = ();
+
+# Open and clear the output directory file otherwise >>output below will append data to existing file
+open(OUTPUT, ">VFA GC data.csv"), printf OUTPUT "FileID,Sample_ID,Counts,Result\n";
+
+# Read each .txt file in current directory
+foreach my $filename(@files){
+  open(FILE, $filename) or die "Could not read from $filename, program halting.";
+
+  # Remove 3-digit suffix and .TXT from filename then notify when done
+  my $formatname = $filename =~ s/0[0-9][0-9]//r;
+  $formatname =~ s/.TXT//g;
+  print "$filename done\n";
+
+  # Bonus: Add filename to list of uniques for any particular reason
+  # $unique{$formatname\} ++;
+
+  # Use ">>VFA_${filename}.extension" if you want separate files for each sample else leave as VFA_result"
+  open(OUTPUT,">>VFA GC data.csv") or die "Could not prepare output file";
+  while(<FILE>)
+  {
+    # Ignore all header data and jump to data for mining
+    next if (1.. /Peaks/);
+
+    # get rid of the pesky newline character
+    chomp;
+
+    # read the fields in the current record as separate variables based on tab
+    (my $peaks,my $Timeoffset,my $RRT,my $Sepcode,my $Width,my $Counts,my $Result,my $Name) = split('\t', $_);
+
+    # Print selected results to output file if $_ not empty
+    if ($_ ne "")
+    { 
+      # Print result to file designated OUTPUT
+      print OUTPUT "$filename,$formatname,$Result,$Name\n";     
+    }
+
+  }
+  close(FILE);
+  close(OUTPUT);
+}
