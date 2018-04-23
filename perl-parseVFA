@@ -1,4 +1,4 @@
-# Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file from GC machine
+# Perl script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file from GC machine
 # Must place script in same directory as .txt files (warning - reads ALL .txt files)
 # Still room to automate
 
