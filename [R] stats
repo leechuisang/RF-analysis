@@ -15,7 +15,7 @@ my_kruskal <- capture.output(kruskal.test(my_data$gperL ~ my_data$Tmt))
 ## (3a) Dunn Test
 # Use a method that suits your data, Bonferroni method can be quite strict ("bonferroni")
 # So an alternative is to use Benjamini-Hochberg method "bh"
-dunn.test(gperL ~ Tmt, data=my_data, method="none")
+dunn.test(my_data$gperL, my_data$Tmt, method="none")
 ## (4a) Write the output to a text file
 cat(str_c("Statistical analysis of totalN data from ", exp_handle),"----------",
     sep = "\n", append = FALSE, file = str_c(output_dir, dated_exp_handle," my_stats.txt"))
