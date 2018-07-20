@@ -1,34 +1,39 @@
-## Use the Shapiro-Wilk test for normality/normal distribution within dataset
-## (Use after tech reps averaged but not biological replicates)
+## (1) Use the Shapiro-Wilk test for normality/normal distribution within dataset
+# (Use after tech reps averaged but not biological replicates)
 # Apply to concentration in g/L, using treatments as my index
 tapply(my_data$gperL, INDEX=my_data$Tmt, FUN=shapiro.test)
 # Assign output to a handle that can be easily written to an output later
 my_shapiro <- capture.output(tapply(my_data$gperL, INDEX=my_data$Tmt, FUN=shapiro.test))
+# Check p-values
+# If p < 0.05 (not normally distributed) run Kruskal Wallis test otherwise use ANOVA
 
-# Check p-values, if p < 0.05 (not normally distributed) run Kruskal test
+## (2a) Kruskal Wallis test
 kruskal.test(my_data$gperL ~ my_data$Tmt)
 my_kruskal <- capture.output(kruskal.test(my_data$gperL ~ my_data$Tmt))
 # Check p-value for significance
 # If significant, run dunn.test to find where the sig diff lies
+## (3a) Dunn Test
 # Use a method that suits your data, Bonferroni method can be quite strict ("bonferroni")
 # So an alternative is to use Benjamini-Hochberg method "bh"
 dunn.test(gperL ~ Tmt, data=my_data, method="none")
-
-# Write the output to a text file
+## (4a) Write the output to a text file
 cat(str_c("Statistical analysis of totalN data from ", exp_handle),"----------",
     sep = "\n", append = FALSE, file = str_c(output_dir, dated_exp_handle," my_stats.txt"))
 cat(my_shapiro, my_kruskal, sep = "\n", append = TRUE,
     file = str_c(output_dir, dated_exp_handle," my_stats.txt"))
 
-## Assuming normal, an ANOVA can be performed followed by Tukey Post Hoc test
+## (2b) ANOVA
+# Assuming normal, an ANOVA can be performed followed by Tukey Post Hoc test
 res.aov <- aov(gperL ~ Tmt, data=my_data)
 summary(res.aov)
 my_summary <- capture.output(summary(res.aov))
-
-# If Pr(>F) < 0.05 then run a Tukey post-hoc to see where differences lie
+# Check p-value for significance
+# If significant, run a Tukey post-hoc to find where the sig diff lies
+## (3b) Tukey Post Hoc test
 TukeyHSD(res.aov)
 my_Tukey <- capture.output(TukeyHSD(res.aov))
-
-# Append all stats to output file
+## (4b) Write the output to a text file
+cat(str_c("Statistical analysis of totalN data from ", exp_handle),"----------",
+    sep = "\n", append = FALSE, file = str_c(output_dir, dated_exp_handle," _ANOVAstats.txt"))
 cat( my_summary, my_Tukey, sep = "\n", append = TRUE,
     file = str_c(output_dir, dated_exp_handle," _ANOVAstats.txt"))
