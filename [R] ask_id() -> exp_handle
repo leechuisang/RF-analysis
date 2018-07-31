@@ -1,11 +1,9 @@
 # Ask for experiment number from user input (e.g. 18-001)
-ask.id <- function(){
-  x <- readline("What is the EXP number? (Format YY-NNN): ")
-  x <- as.numeric(unlist(strsplit(x, "-")))}
-exp_id <- ask.id()
-
 # Assign to exp_handle (e.g. EXP-18-001) and date_exp_stamp (2018-01-01 EXP-18-001)
-exp_year <- exp_id[1]
-exp_num <- str_pad(exp_id[2], 3, pad="0")
-exp_handle <- str_c("EXP", exp_year, exp_num,sep="-")
-date_exp_stamp <- str_c(Sys.Date(), exp_handle,sep="-")
+ask.id <- function(){
+  x <- readline("What is the EXP number? (Format YY-NNN): ") 
+  x <- as.numeric(unlist(strsplit(x,"-")))
+  str_c("EXP", x[1], str_c(str_pad(x[2], 3, pad = 0)), sep = "-")
+}
+exp_handle <- ask.id()
+dated_exp_handle <- str_c(Sys.Date(), exp_handle, sep = " ")
