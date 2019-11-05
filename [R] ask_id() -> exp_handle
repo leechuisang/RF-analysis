@@ -1,12 +1,11 @@
-# Load stringr
-library(stringr)
+require(stringr) # Load stringr to use str_c() function etc.
 
 # Ask for experiment number from user input (e.g. 18-001)
 # Assign to exp_handle (e.g. EXP-18-001) and date_exp_stamp (2018-01-01 EXP-18-001)
 ask.id <- function(){
-  x <- readline("What is the EXP number? (Format YY-NNN): ") 
-  x <- as.numeric(unlist(strsplit(x,"-")))
-  str_c("EXP", x[1], str_c(str_pad(x[2], 3, pad = 0)), sep = "-")
+  x <- readline("What is the EXP number? (Format YY-NNN): ") # User input request
+  x <- as.numeric(unlist(strsplit(x, "-"))) # Convert that number to the correct format
+  str_c("EXP", x[1], str_c(str_pad(x[2], 3, pad = 0)), sep = "-") # And pad out to 3 digits, include the prefix 'EXP'
 }
-exp_handle <- ask.id()
-dated_exp_handle <- str_c(Sys.Date(), exp_handle, sep = " ")
+exp_handle <- ask.id() # When this function is prompted, save the output to 'exp_handle'
+dated_exp_handle <- str_c(Sys.Date(), exp_handle, sep = " ") # Create 'dated_exp_handle' from system date (laptop/PC)
