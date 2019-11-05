@@ -1,5 +1,6 @@
 # Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file
 # Must place script in same directory as .txt files (warning - reads ALL .txt files)
+# Version 2.19.11.5
 
 #!/usr/bin/perl
 use strict;
