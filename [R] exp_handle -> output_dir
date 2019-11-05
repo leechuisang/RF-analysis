@@ -1,3 +1,7 @@
+# Creates a folder with today's date and experiment number and saves the output here.
+# Not ideal, please look at other script to create folders for each experiment, and
+# save dated_output file names.
+
 # Check if a folder exists with the current experiment number (exp_handle)
 if(length(grep(str_c(exp_handle,' General analysis'), all_dirs)) == 0){
   # If not, create a new folder with today's date and experiment no (date_exp_stamp) and set as the output directory
