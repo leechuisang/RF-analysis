@@ -1,16 +1,21 @@
 # Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file
 # Must place script in same directory as .txt files (warning - reads ALL .txt files)
-# Version 2.19.11.5
+# After extracting, perl will zip all .txt and .run files (please bring with you)
+# Both output files will start with today's date: VFA GC.csv (results), and VFA_full.zip (raw)
+# Version 2.19.11.5b
 
 #!/usr/bin/perl
 use strict;
 use warnings;
+use POSIX qw(strftime);
 
 my @files = glob("*.txt");
 my @samples = ();
 
+my $datestring = strftime "%Y-%m-%d", gmtime;
+
 # Open and clear the output directory file otherwise >>output below will append data to existing file
-open(OUTPUT, ">VFA GC data.csv"), printf OUTPUT "FileID, Sample_ID, Peaks, Counts, Result, Name\n";
+open(OUTPUT, ">$datestring - VFA GC data.csv"), printf OUTPUT "FileID, Sample_ID, Peaks, Counts, Result, Name\n";
 
 # Read each .txt file in current directory
 foreach my $filename(@files){
@@ -26,7 +31,7 @@ foreach my $filename(@files){
   # $unique{$formatname\} ++;
 
   # Use ">>VFA_${filename}.extension" if you want separate files for each sample else leave as VFA_result"
-  open(OUTPUT,">>VFA GC data.csv") or die "Could not prepare output file";
+  open(OUTPUT,">>$datestring - VFA GC data.csv") or die "Could not prepare output file";
   while(<FILE>)
   {
     # Ignore all header data and jump to data for mining
@@ -39,13 +44,20 @@ foreach my $filename(@files){
     (my $peaks, my $Timeoffset, my $RRT, my $Sepcode, my $Width, my $Counts, my $Result, my $Name) = split('\t', $_);
 
     # Print selected results to output file if $Result is not empty
-    if ($Result != 0)
+    if (($Result != 0) || ($Result eq "INT STD"))
     { 
       # Print result to file designated OUTPUT
       print OUTPUT "$filename, $formatname, $peaks, $Counts, $Result, $Name\n";     
     }
 
   }
-  close(FILE);
-  close(OUTPUT);
+  close(FILE); # Close any opened files
+  close(OUTPUT); # Close the output file (saves)
 }
+
+use IO::Compress::Zip qw(:all); # Use Zip package
+
+my $zip = "$datestring - VFA_full.zip"; # Define output zip file
+
+zip [ glob("*.run *.txt") ] => "$zip" # Find all extension types to zip and save to output
+or die "Cannot create zip file: $ZipError"; # Show error otherwise
