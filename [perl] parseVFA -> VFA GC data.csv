@@ -37,7 +37,7 @@ foreach my $filename(@files){
     # read the fields in the current record as separate variables based on tab
     (my $peaks, my $Timeoffset, my $RRT, my $Sepcode, my $Width, my $Counts, my $Result, my $Name) = split('\t', $_);
 
-    # Print selected results to output file if $_ not empty
+    # Print selected results to output file if $Result is not empty
     if ($Result != 0)
     { 
       # Print result to file designated OUTPUT
