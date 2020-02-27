@@ -2,7 +2,7 @@
 # Must place script in same directory as .txt files (warning - reads ALL .txt files)
 # After extracting, perl will zip all .txt and .run files (please bring with you)
 # Both output files will start with today's date: VFA GC.csv (results), and VFA_full.zip (raw)
-# Version 2.19.11.5b
+# Version 2.20.02.27
 
 #!/usr/bin/perl
 use strict;
@@ -47,7 +47,7 @@ foreach my $filename(@files){
     if (($Result != 0) || ($Result eq "INT STD"))
     { 
       # Print result to file designated OUTPUT
-      print OUTPUT "$filename, $formatname, $peaks, $Counts, $Result, $Name\n";     
+      print OUTPUT "$filename, $formatname, $peaks, $Width, $Counts, $Result, $Name\n";     
     }
 
   }
