@@ -1,21 +1,30 @@
-# Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .txt file
-# Must place script in same directory as .txt files (warning - reads ALL .txt files)
-# After extracting, perl will zip all .txt and .run files (please bring with you)
-# Both output files will start with today's date: VFA GC.csv (results), and VFA_full.zip (raw)
-# Version 2.20.02.27
+# Script to extract VFA FileID, Sample_ID, Counts and Result (VFA-type) from raw .TXT file
+# Must place Perl script in same directory as .TXT files exported from the GC.
+# This creates 2 output files, a .CSV file containing all the Results that are not 0,
+# and a .ZIP file containing all the .TXT and .RUN files in the same dir in compressed form.
+# The .CSV and .ZIP files will start with the current date followed by the dir name in format:
+# YYYY-MM-DD_DIRNAME_GCdata.EXT"
+# Version 2.20.09.21
 
 #!/usr/bin/perl
 use strict;
-use warnings;
+#use warnings;
+no warnings;
+use Cwd;
+use File::Basename;
 use POSIX qw(strftime);
+use IO::Compress::Zip qw(:all); # Use Zip package
 
-my @files = glob("*.txt");
-my @samples = ();
+my @files = glob("*.TXT");
+
+my $cwd = basename(cwd());
 
 my $datestring = strftime "%Y-%m-%d", gmtime;
 
+my $outfile = "${datestring}_${cwd}_GCdata.csv";
+
 # Open and clear the output directory file otherwise >>output below will append data to existing file
-open(OUTPUT, ">$datestring - VFA GC data.csv"), printf OUTPUT "FileID, Sample_ID, Peaks, Counts, Result, Name\n";
+open(OUTPUT, ">$outfile"), printf OUTPUT "FileID, Sample_ID, Peaks, Counts, Result, Name\n";
 
 # Read each .txt file in current directory
 foreach my $filename(@files){
@@ -31,7 +40,7 @@ foreach my $filename(@files){
   # $unique{$formatname\} ++;
 
   # Use ">>VFA_${filename}.extension" if you want separate files for each sample else leave as VFA_result"
-  open(OUTPUT,">>$datestring - VFA GC data.csv") or die "Could not prepare output file";
+  open(OUTPUT, ">>$outfile") or die "Could not prepare output file";
   while(<FILE>)
   {
     # Ignore all header data and jump to data for mining
@@ -41,23 +50,25 @@ foreach my $filename(@files){
     chomp;
 
     # read the fields in the current record as separate variables based on tab
-    (my $peaks, my $Timeoffset, my $RRT, my $Sepcode, my $Width, my $Counts, my $Result, my $Name) = split('\t', $_);
+    my @cols = split('\t');
 
-    # Print selected results to output file if $Result is not empty
-    if (($Result != 0) || ($Result eq "INT STD"))
+    #Print selected results to output file if $Result is not empty
+    if ($cols[6] eq "INT STD"|$cols[6] != 0) # Invisible errors in perl but not major
     { 
       # Print result to file designated OUTPUT
-      print OUTPUT "$filename, $formatname, $peaks, $Width, $Counts, $Result, $Name\n";     
+	  print OUTPUT "$filename, $formatname, $cols[0], $cols[5], $cols[6], $cols[7]\n";  
     }
-
   }
-  close(FILE); # Close any opened files
-  close(OUTPUT); # Close the output file (saves)
+  close(FILE);
+  close(OUTPUT);
 }
 
-use IO::Compress::Zip qw(:all); # Use Zip package
+my $zip = "$datestring $cwd GCdata.zip"; # Define output zip file
 
-my $zip = "$datestring - VFA_full.zip"; # Define output zip file
+zip [ glob("*.run *.txt") ] => "$zip", Zip64 => 1, Level => Z_BEST_COMPRESSION, AutoClose => 1, ZipComment => "Zipped using parseVFA v2.20.09.21.pl"
+&& print "*** Zipped all .TXT and .RUN files! ***\n" # Find all extension types to zip and save to output
+or die "*** Cannot create zip file ***\n: $ZipError"; # Show error otherwise
 
-zip [ glob("*.run *.txt") ] => "$zip" # Find all extension types to zip and save to output
-or die "Cannot create zip file: $ZipError"; # Show error otherwise
+unlink glob("*.run *.txt");
+
+close
